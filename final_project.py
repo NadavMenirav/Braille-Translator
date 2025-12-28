@@ -7,51 +7,51 @@ Original file is located at
     https://colab.research.google.com/drive/1sNlbtxOWczGEcbhmqheYHlDTUJhy0FJQ
 """
 
-# ייבוא של ספרייה מתמטית לעבודה עם מערכים ומטריצות - מאוד שימושית בעיבוד תמונה ונתונים
+# Importing a mathematical library for working with arrays and matrices - very useful in image and data processing
 import numpy as np
 
-# ספרייה לעיבוד נתונים בטבלאות – שימושית במיוחד כאשר עובדים עם דאטה בפורמט CSV או דומה
+# Library for data processing in tables – especially useful when working with data in CSV format or similar
 import pandas as pd
 
-# ספרייה המאפשרת גישה למערכת הקבצים – משמשת לקריאת קבצים מתוך תיקיות
+# Library allowing access to the file system – used for reading files from folders
 import os
 
-# ספרייה של Anvil – מאפשרת תקשורת עם ממשק ה-Web שבניתי דרך השרת של Anvil
+# Anvil library – allows communication with the Web interface I built via the Anvil server
 import anvil.server
 
-# ספרייה לציור גרפים – נשתמש בה לציור גרפים של דיוק ואיבוד במהלך האימון
+# Library for drawing graphs – we will use it to plot accuracy and loss graphs during training
 import matplotlib.pyplot as plt
 
-# ספרייה נוספת לציור גרפים עם עיצוב קצת יותר יפה וקל לשימוש
+# Additional library for drawing graphs with a slightly nicer design and ease of use
 import seaborn as sns
 
-# ספרייה לעבודה עם למידת מכונה עמוקה (Deep Learning) – נשתמש בה כדי להגדיר ולאמן את המודל שלנו
+# Library for working with Deep Learning – we will use it to define and train our model
 import tensorflow as tf
-from tensorflow import keras  # חלק מתוך טנסורפלואו שמכיל כלים לבניית מודלים של רשתות נוירונים
+from tensorflow import keras  # Part of TensorFlow that contains tools for building neural network models
 
-# כלי עבודה עם נתיבים – מאפשר גישה נוחה לקבצים לפי מיקומים בתיקיות
+# Path handling tools – allows convenient access to files according to folder locations
 from pathlib import Path
 
-# מקודד תוויות (labels) – משמש אותנו להמיר תוויות כמו אותיות לייצוג מספרי (למשל: 'A' -> 0)
+# Label encoder – used to convert labels like letters into numerical representation (e.g.: 'A' -> 0)
 from sklearn.preprocessing import LabelEncoder
 
-# ספרייה לעיבוד תמונה – PIL משמשת לפתיחה ועריכה של קבצים גרפיים
+# Image processing library – PIL is used for opening and editing graphic files
 import PIL
-from PIL import Image  # מחלקת Image מתוך PIL
+from PIL import Image  # Image class from PIL
 
-# ספרייה מתקדמת יותר לעיבוד תמונה – מאפשרת בין השאר המרות, חיתוך וקריאה של תמונות
+# More advanced library for image processing – allows, among other things, conversions, cropping, and reading images
 import cv2
 
-# ספרייה לקריאה של קבצים בינאריים – לדוגמה, תמונה שמגיעה מהאינטרנט כ-Bytes
+# Library for reading binary files – for example, an image arriving from the internet as Bytes
 import io
 
-# (מופיע שוב) טנסורפלואו – כבר יובא למעלה, אין צורך לייבא שוב
+# (Appears again) TensorFlow – already imported above, no need to import again
 import tensorflow as tf
 
-# (מופיע שוב) LabelEncoder – כבר יובא למעלה
+# (Appears again) LabelEncoder – already imported above
 from sklearn.preprocessing import LabelEncoder
 
-# ספרייה לטעינה/שמירה של אובייקטים לקבצים (כמו LabelEncoder מאומן)
+# Library for loading/saving objects to files (like a trained LabelEncoder)
 import pickle
 
 # This command installs the 'anvil-uplink' Python package in the current environment.
@@ -136,343 +136,4 @@ name_list = le.fit_transform(name_list)
 # Normalize the pixel values of the images in 'images_list' by scaling them from [0, 255] to [0, 1]
 images_list = images_list / 255.0
 
-# Check and display the shape (dimensions) of the 'images_list' NumPy array
-images_list.shape
-
-# Display the first image in the 'images_list' array using matplotlib's imshow function
-plt.imshow(images_list[0])
-
-# Check and display the shape (dimensions) of the 'name_list' NumPy array containing the encoded labels
-name_list.shape
-
-# Import the train_test_split function from scikit-learn to split the dataset into training and testing sets
-from sklearn.model_selection import train_test_split
-
-# Split the dataset into training and testing sets
-# images_list: input images, name_list: corresponding labels
-# test_size=0.2 means 20% of the data will be reserved for testing, 80% for training
-# random_state=42 ensures reproducibility by setting a fixed seed for shuffling
-X_train, X_test, y_train, y_test = train_test_split(images_list, name_list, test_size=0.2, random_state=42)
-
-# Build a Sequential Convolutional Neural Network (CNN) model using Keras
-
-model = keras.Sequential([
-    # First convolutional layer with 64 filters, each of size 5x5
-    # Padding='same' keeps the output size same as input
-    # Activation function 'relu' introduces non-linearity
-    keras.layers.Conv2D(filters=64, kernel_size=(5, 5), padding='same', activation='relu'),
-
-    # Second convolutional layer with 64 filters of size 3x3, same padding and ReLU activation
-    keras.layers.Conv2D(filters=64, kernel_size=(3, 3), padding='same', activation='relu'),
-
-    # MaxPooling layer to reduce spatial dimensions and downsample features
-    keras.layers.MaxPooling2D(),
-
-    # Third convolutional layer with 64 filters, 3x3 kernel, same padding and ReLU activation
-    keras.layers.Conv2D(filters=64, kernel_size=(3, 3), padding='same', activation='relu'),
-
-    # Another MaxPooling layer to further downsample
-    keras.layers.MaxPooling2D(),
-
-    # Fourth convolutional layer, same configuration as previous conv layers
-    keras.layers.Conv2D(filters=64, kernel_size=(3, 3), padding='same', activation='relu'),
-
-    # Final MaxPooling layer before flattening
-    keras.layers.MaxPooling2D(),
-
-    # Flatten the 3D output to 1D vector for fully connected layers
-    keras.layers.Flatten(),
-
-    # Fully connected dense layer with 576 units and ReLU activation to learn complex features
-    keras.layers.Dense(units=576, activation="relu"),
-
-    # Another dense layer with 288 units and ReLU activation
-    keras.layers.Dense(units=288, activation="relu"),
-
-    # Output layer with 26 units (one per letter) and softmax activation for classification probabilities
-    keras.layers.Dense(units=26, activation="softmax")
-])
-
-# Compile the CNN model to configure the learning process
-
-model.compile(
-    optimizer="Adam",  # Use the Adam optimizer, which adapts the learning rate during training for efficient convergence
-    loss="SparseCategoricalCrossentropy",  # Use sparse categorical crossentropy as the loss function, suitable for multi-class classification with integer labels
-    metrics=["sparse_categorical_accuracy"]  # Track sparse categorical accuracy to evaluate the model's performance during training and validation
-)
-
-# Import the EarlyStopping callback from Keras to help prevent overfitting during training
-from keras.callbacks import EarlyStopping
-
-# Initialize EarlyStopping to monitor the validation sparse categorical accuracy metric
-# patience=5 means training will stop if no improvement is seen for 5 consecutive epochs
-# restore_best_weights=True ensures the model weights revert to those of the best epoch
-early_stopping = EarlyStopping(monitor="val_sparse_categorical_accuracy", patience=5, restore_best_weights=True)
-
-# Train the model using the training data (X_train, y_train)
-# epochs=6 limits the maximum number of training cycles to 6
-# validation_split=0.1 means 10% of the training data is held out for validation during training
-# callbacks list includes early_stopping to stop training early if needed
-# verbose=1 shows progress and training metrics for each epoch
-history = model.fit(
-    X_train,
-    y_train,
-    epochs=6,
-    validation_split=0.1,
-    callbacks=[early_stopping],  # Using only one callback here
-    verbose=1
-)
-
-# Print a detailed summary of the model architecture
-# This includes each layer's type, output shape, and number of parameters (weights)
-# Helps to understand the complexity and size of the model
-model.summary()
-
-# Create an array of epoch numbers starting from 1 to the total number of training epochs
-time = np.arange(1, len(history.history['loss']) + 1)
-
-# Plot the training accuracy over epochs
-sns.lineplot(data=history.history, x=time, y='sparse_categorical_accuracy', label='Training Accuracy')
-
-# Plot the validation accuracy over epochs
-sns.lineplot(data=history.history, x=time, y='val_sparse_categorical_accuracy', label='Validation Accuracy')
-
-# Set the title of the plot
-plt.title('Accuracy History')
-
-# Show the legend (automatically uses the labels from the plots)
-plt.legend()
-
-# Label the X-axis as "Epoch"
-plt.xlabel("Epoch")
-
-# Label the Y-axis as "Accuracy"
-plt.ylabel("Accuracy")
-
-# Display the plot
-plt.show()
-
-# Plot training loss over epochs
-sns.lineplot(data=history.history, x=time, y='loss', label='Training Loss')
-
-# Plot validation loss over epochs
-sns.lineplot(data=history.history, x=time, y='val_loss', label='Validation Loss')
-
-# Set the title of the plot
-plt.title('Loss History')
-
-# Label the X-axis as "Epoch"
-plt.xlabel('Epoch')
-
-# Label the Y-axis as "Loss"
-plt.ylabel('Loss')
-
-# Show the legend to differentiate between training and validation loss
-plt.legend()
-
-# Display the plot
-plt.show()
-
-# Define the path to a sample Braille letter image (grayscale image)
-printImage = ('/content/drive/MyDrive/School/ML/DATA/drive-download-20250618T125357Z-1-001.zip (Unzipped Files)/Braille Dataset/a1.JPG10dim.jpg')
-
-def printImage(image):
-    # Read the image from the provided file path using OpenCV
-    letter_image = cv2.imread(image)
-
-    # Convert the image from BGR (default in OpenCV) to RGB
-    letter_image = cv2.cvtColor(letter_image, cv2.COLOR_BGR2RGB)
-
-    # Resize the image to 28x28 pixels, which matches the model input size
-    resized_letter = cv2.resize(letter_image, (28, 28))
-
-    # Normalize the pixel values to range [0, 1] for neural network compatibility
-    normalized_letter = resized_letter / 255.0
-
-    # Add a batch dimension to match the input shape expected by the CNN model
-    input_letter = np.expand_dims(normalized_letter, axis=0)
-
-    # Make a prediction using the trained model
-    prediction = model.predict(input_letter)
-
-    # Convert the prediction (numeric class) back into the corresponding letter
-    predicted_label = le.inverse_transform([np.argmax(prediction)])
-
-    # Print the predicted letter to the console
-    print("Predicted letter:", predicted_label[0])
-
-# Evaluate the trained model on the test dataset to measure its final performance
-model.evaluate(X_test, y_test)
-
-def crop_white_margins(image_path):
-    # Read the image in grayscale mode (one channel, values 0–255)
-    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-
-    # Convert the grayscale image into binary (black and white).
-    # All pixels above 250 become 0 (black), others become 255 (white), due to the inversion.
-    _, thresh = cv2.threshold(image, 250, 255, cv2.THRESH_BINARY_INV)
-
-    # Find coordinates of all non-zero pixels (which were originally darker than white)
-    coords = cv2.findNonZero(thresh)
-
-    # Calculate the bounding rectangle around the non-white content
-    x, y, w, h = cv2.boundingRect(coords)
-
-    # Crop the original image to this bounding rectangle (remove surrounding white margins)
-    cropped = image[y:y+h, x:x+w]
-
-    # Return the cropped image
-    return cropped
-
-# Path to the image file to be processed
-image_path = '/content/drive/MyDrive/School/ML/DATA/drive-download-20250618T125357Z-1-001.zip (Unzipped Files)/Braille word/have.jpg'
-
-# Apply the crop_white_margins function to remove unnecessary white space from the image
-cropped_image = crop_white_margins(image_path)
-
-# Display the cropped image using matplotlib in grayscale
-plt.imshow(cropped_image, cmap='gray')
-plt.title("Without white borders")  # Title for the image window
-plt.axis('off')  # Hide the axis ticks and labels for a cleaner view
-plt.show()  # Render the image
-
-def split_letters_from_two_columns__(image, threshold=200, max_white_gap=2):
-    # Initialize the list to store cropped letter images
-    letters = []
-
-    # Get height and width of the image
-    h, w = image.shape
-
-    # Initial state to manage where we are in scanning:
-    # 0 = in white space before first letter
-    # 1 = currently inside first column of letters
-    # 2 = white space between columns
-    # 3 = currently inside second column of letters
-    state = 0
-
-    # Initialize variables to keep track of column positions
-    start_col = 0
-    end_col = 0
-
-    # These booleans are not used in this final version but kept from development
-    in_first_col = False
-    in_white_between = False
-    in_second_col = False
-
-    # Loop through each column in the image from left to right
-    for col in range(w):
-        column = image[:, col]
-
-        # A column is considered "dark" if it has any pixel below the threshold
-        is_dark = np.min(column) < threshold
-
-        # If we already marked an end column, extract the letter and reset
-        if end_col != 0:
-            letter_img = image[:, start_col:end_col]
-            letters.append(letter_img)
-            start_col = 0
-            end_col = 0
-            state = 0
-            continue
-
-        # Begin scanning when we hit the first dark column
-        if state == 0 and not is_dark:
-            continue
-
-        if is_dark and state == 0:
-            state = 1
-            start_col = col
-            continue
-
-        if is_dark and state == 1:
-            continue
-
-        if not is_dark and state == 1:
-            state = 2
-            continue
-
-        if state == 2 and not is_dark:
-            continue
-
-        if state == 2 and is_dark:
-            state = 3
-            continue
-
-        if is_dark and state == 3:
-            continue
-
-        if state == 3 and not is_dark:
-            end_col = col
-            continue
-
-        # If we reach the last column and are still inside a letter, finalize the crop
-        if col == w - 1:
-            end_col = col
-            letter_img = image[:, start_col:end_col]
-            letters.append(letter_img)
-            state = 0
-
-    # Edge case: if loop ends while still in a letter, ensure it is saved
-    if state == 3:
-        end_col = col
-        letter_img = image[:, start_col:end_col]
-        letters.append(letter_img)
-
-    return letters
-
-def printImageFromArray(image_array):
-    # If the image is in grayscale (2D array), convert it to RGB (3D array)
-    if len(image_array.shape) == 2:  # grayscale image has shape (H, W)
-        image_array = cv2.cvtColor(image_array, cv2.COLOR_GRAY2RGB)
-
-    # Resize the image to the input shape expected by the model (28x28)
-    resized_letter = cv2.resize(image_array, (28, 28))  # input size must match training images
-
-    # Normalize pixel values to be in the range [0, 1]
-    normalized_letter = resized_letter / 255.0
-
-    # Add a batch dimension (model expects input shape of (1, 28, 28, 3))
-    input_letter = np.expand_dims(normalized_letter, axis=0)
-
-    # Predict the class probabilities using the trained model
-    prediction = model.predict(input_letter)
-
-    # Decode the predicted class index back to the original letter label
-    predicted_label = le.inverse_transform([np.argmax(prediction)])
-
-    # Print the final predicted letter
-    print("Predicted letter:", predicted_label[0])
-
-letters = split_letters_from_two_columns__(cropped_image)
-
-for i, letter in enumerate(letters):
-    printImageFromArray(letter)  # Calls the function to preprocess the letter image, run the model prediction, and print the predicted letter
-    plt.imshow(letter, cmap='gray')  # Displays the letter image in grayscale
-    plt.title(f"Letter {i+1}")  # Sets the plot title showing the letter number in the sequence
-    plt.axis('off')  # Turns off axis lines and labels for a cleaner image display
-    plt.show()  # Shows the plot window for the current letter image
-
-@anvil.server.callable
-def predict_braille(image_bytes):
-    # Convert the incoming image bytes to a PIL Image object
-    image = Image.open(io.BytesIO(image_bytes))
-    # Convert the image to RGB format to ensure consistency with the model input
-    image = image.convert('RGB')
-    # Resize the image to 28x28 pixels to match the model's expected input size
-    image = image.resize((28, 28))
-    # Convert the PIL image to a NumPy array and normalize pixel values to range [0, 1]
-    image_np = np.array(image) / 255.0
-    # Add a batch dimension to the array to match the model input shape (1, 28, 28, 3)
-    image_np = np.expand_dims(image_np, axis=0)
-
-    # Use the trained model to predict the class probabilities for the input image
-    prediction = model.predict(image_np)
-    # Find the index of the class with the highest predicted probability
-    predicted_class = np.argmax(prediction)
-    # Convert the predicted class index back to the corresponding label (letter)
-    predicted_letter = le.inverse_transform([predicted_class])[0]
-
-    # Return the predicted letter as the output of this server function
-    return predicted_letter
-
-anvil.server.wait_forever()
+# Check and display the shape (dimensions)
