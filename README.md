@@ -1,4 +1,4 @@
-# 🔤 Braille Letter Recognition System
+# 🔤 Braille-Translator
 
 A deep learning project that uses Convolutional Neural Networks (CNN) to recognize Braille letters from images, with a web interface powered by Anvil.
 
